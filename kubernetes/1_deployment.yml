@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: breeze
+  namespace: breeze
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: breeze
+      tier: service
+  template:
+    metadata:
+      labels:
+        app: breeze
+        tier: service
+
+    spec:
+      volumes:
+        - name: gpio-mem
+          hostPath:
+            path: /dev/gpiomem
+        - name: gpio
+          hostPath:
+            path: /sys/class/gpio
+      containers:
+        - name: breeze
+          image: garugaru/breeze:arm-latest
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: gpio-mem
+              mountPath: /dev/gpiomem
+            - name: gpio
+              mountPath: /sys/class/gpio
+          securityContext:
+            privileged: true
+          resources:
+            requests:
+              memory: "5Mi"
+              cpu: "10m"
+            limits:
+              memory: "15Mi"
+              cpu: "10m"
+
