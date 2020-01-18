@@ -1,5 +1,10 @@
 # Breeze
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/GaruGaru/breeze)](https://goreportcard.com/report/github.com/GaruGaru/breeze)
+[![Travis Card](https://travis-ci.org/GaruGaru/breeze.svg?branch=master)](https://travis-ci.org/GaruGaru/breeze)
+[![MicroBadger Size](https://img.shields.io/microbadger/image-size/garugaru/breeze)](https://cloud.docker.com/u/garugaru/repository/docker/garugaru/breeze)
+ 
+
 Smart, Temperature based fan controller for raspberry pi using gpio written in go
 
 ## Schema for fan control using transistor 
