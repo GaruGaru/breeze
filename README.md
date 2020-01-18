@@ -7,8 +7,14 @@ Smart, Temperature based fan controller for raspberry pi using gpio written in g
 
 ## Usage
 
+example: 
+
+When the detected temperature reaches the *target-temperature* (60°) the gpio pin n.12 will be set to HIGH until the detected temperature
+is 15% lower than the target-temperature 
+
+
 ```bash
-breeze controller --gpio-pin=12 --target-temperature=60
+breeze controller --gpio-pin=12 --target-temperature=60 --temperature-cooldown-percent=15
 ```
 
 ## Deploy 
