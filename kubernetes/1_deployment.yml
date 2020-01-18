@@ -26,6 +26,7 @@ spec:
       containers:
         - name: breeze
           image: garugaru/breeze:arm-latest
+          command: ["breeze", "controller"]
           imagePullPolicy: Always
           volumeMounts:
             - name: gpio-mem

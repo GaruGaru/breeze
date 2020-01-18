@@ -20,10 +20,13 @@ RUN export GOARCH=$ARCH GOOS=$OS CGO_ENABLED=0 && go build \
 
 FROM scratch AS final
 
+WORKDIR /
+ENV PATH="/"
+
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
-COPY --from=builder /app /app
+COPY --from=builder /app /breeze
 
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
-ENTRYPOINT ["/app"]
+ENTRYPOINT ["breeze"]

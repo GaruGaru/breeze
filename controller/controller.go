@@ -52,7 +52,7 @@ func (c *Controller) Run(fan fan.Controller, sensor sensor.Thermal) error {
 			return err
 		}
 
-		log.Infof("temperature %d°", int(temp))
+		log.Debugf("temperature %d°", int(temp))
 
 		if !c.status.coolingDown && temp > c.config.Threshold {
 			now := time.Now()

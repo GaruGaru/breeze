@@ -17,7 +17,7 @@ func NewGpio(pinNum int) (*Gpio, error) {
 
 func (g *Gpio) Init() error {
 	if err := gpio.Open(); err != nil {
-		panic(err)
+		return err
 	}
 
 	g.pin = gpio.NewPin(g.pinNum)
