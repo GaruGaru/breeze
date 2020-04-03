@@ -1,8 +1,5 @@
-ARG GO_VERSION=1.13.5
+ARG GO_VERSION=1.14
 FROM golang:${GO_VERSION}-alpine AS builder
-
-ARG ARCH=amd64
-ARG OS=linux
 
 RUN apk add --no-cache ca-certificates git
 
@@ -13,7 +10,7 @@ RUN go mod download
 
 COPY ./ ./
 
-RUN export GOARCH=$ARCH GOOS=$OS CGO_ENABLED=0 && go build \
+RUN CGO_ENABLED=0 && go build \
     -ldflags="-s -w" \
     -installsuffix 'static' \
     -o /app .
@@ -26,7 +23,5 @@ ENV PATH="/"
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 COPY --from=builder /app /breeze
-
-COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 ENTRYPOINT ["breeze"]
