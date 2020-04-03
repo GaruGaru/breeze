@@ -3,7 +3,6 @@ package fan
 import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/warthog618/gpiod"
-	"github.com/warthog618/gpiod/device/rpi"
 )
 
 const (
@@ -22,7 +21,7 @@ func NewGpio(pinNum int) (*Gpio, error) {
 		return nil, err
 	}
 
-	line, err := chip.RequestLine(rpi.GPIO14, gpiod.AsOutput(1))
+	line, err := chip.RequestLine(pinNum, gpiod.AsOutput(1))
 	if err != nil {
 		return nil, err
 	}

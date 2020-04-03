@@ -3,6 +3,9 @@ package cmd
 import (
 	"breeze/fan"
 	"github.com/spf13/cobra"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 func init() {
@@ -27,8 +30,22 @@ var offCmd = &cobra.Command{
 			panic(err)
 		}
 
-		if err := fanController.Close(); err != nil {
-			panic(err)
+		quit := make(chan os.Signal, 1)
+		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+		defer signal.Stop(quit)
+
+		for {
+			select {
+			default:
+				if err := fanController.Off(); err != nil {
+					panic(err)
+				}
+			case <-quit:
+				if err := fanController.Close(); err != nil {
+					panic(err)
+				}
+			}
 		}
+
 	},
 }
