@@ -3,6 +3,7 @@ package cmd
 import (
 	"breeze/fan"
 	"github.com/spf13/cobra"
+	"time"
 )
 
 func init() {
@@ -23,6 +24,14 @@ var onCmd = &cobra.Command{
 			panic(err)
 		}
 
-		fanController.On()
+		if err := fanController.On(); err != nil {
+			panic(err)
+		}
+
+		time.Sleep(10*time.Second)
+
+		if err := fanController.Close(); err != nil {
+			panic(err)
+		}
 	},
 }

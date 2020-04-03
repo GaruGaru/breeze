@@ -1,8 +1,7 @@
 package fan
 
 type Controller interface {
-	Init() error
-	On()
-	Off()
+	On() error
+	Off() error
 	Close() error
 }

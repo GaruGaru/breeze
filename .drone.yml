@@ -1,0 +1,157 @@
+kind: pipeline
+type: kubernetes
+name: linux-amd64
+
+platform:
+  arch: amd64
+  os: linux
+
+steps:
+  - name: test
+    image: golang:1.13.0
+    commands:
+      - go build
+      - go test ./...
+
+  - name: publish
+    image: plugins/docker:18
+    settings:
+      auto_tag: true
+      auto_tag_suffix: linux-amd64
+      dockerfile: Dockerfile
+      repo: garugaru/breeze
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+    when:
+      event:
+        - push
+
+---
+kind: pipeline
+type: kubernetes
+name: linux-arm
+
+platform:
+  arch: arm
+  os: linux
+
+steps:
+  - name: build
+    image: golang:1.13.0
+    commands:
+      - go build
+      - go test ./...
+    environment:
+      GOARCH: arm
+      GOOS: linux
+
+  - name: publish
+    image: plugins/docker:18
+    settings:
+      auto_tag: true
+      auto_tag_suffix: linux-arm
+      dockerfile: Dockerfile
+      repo: garugaru/breeze
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+
+trigger:
+  event:
+    - push
+depends_on:
+  - linux-amd64
+---
+kind: pipeline
+type: kubernetes
+name: manifest
+
+steps:
+  - name: publish
+    image: plugins/manifest:1.2
+    settings:
+      auto_tag: true
+      ignore_missing: true
+      spec: docker/manifest.tmpl
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+
+trigger:
+  event:
+    - push
+
+depends_on:
+  - linux-amd64
+  - linux-arm
+
+---
+kind: pipeline
+type: kubernetes
+name: rollout
+
+platform:
+  arch: amd64
+  os: linux
+
+node_selector:
+  kubernetes.io/arch: "amd64"
+
+steps:
+  - name: apply resources
+    image: sinlead/drone-kubectl
+    settings:
+      kubernetes_server:
+        from_secret: kubernetes_server
+      kubernetes_cert:
+        from_secret: kubernetes_ca
+      kubernetes_token:
+        from_secret: kubernetes_token
+    commands:
+      - kubectl apply -f kubernetes/0_namespace.yml
+      - kubectl apply -f kubernetes/1_deployment.yml
+      - kubectl -n breeze set image deployment/breeze breeze=garugaru/breeze:${DRONE_COMMIT_SHA} --record
+      - kubectl rollout status -f kubernetes/1_deployment.yml
+
+trigger:
+  event:
+    - push
+
+depends_on:
+  - linux-amd64
+  - linux-arm
+  - manifest
+---
+kind: secret
+name: docker_username
+get:
+  path: docker-credentials
+  name: username
+---
+kind: secret
+name: docker_password
+get:
+  path: docker-credentials
+  name: password
+---
+kind: secret
+name: kubernetes_ca
+get:
+  path: drone-account
+  name: ca.crt
+---
+kind: secret
+name: kubernetes_token
+get:
+  path: drone-account
+  name: token
+---
+kind: secret
+name: kubernetes_server
+get:
+  path: kubernetes
+  name: server

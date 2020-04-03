@@ -1,43 +1,54 @@
 package fan
 
-import "github.com/warthog618/gpio"
+import (
+	"github.com/hashicorp/go-multierror"
+	"github.com/warthog618/gpiod"
+	"github.com/warthog618/gpiod/device/rpi"
+)
 
+const (
+	consumerName = "breeze"
+	gpioChip = "gpiochip0"
+)
 type Gpio struct {
 	pinNum int
-	pin    *gpio.Pin
+	chip   *gpiod.Chip
+	line   *gpiod.Line
 }
 
 func NewGpio(pinNum int) (*Gpio, error) {
-	controller := &Gpio{pinNum: pinNum}
-	if err := controller.Init(); err != nil {
+	chip, err := gpiod.NewChip(gpioChip, gpiod.WithConsumer(consumerName))
+	if err != nil {
 		return nil, err
 	}
-	return controller, nil
-}
 
-func (g *Gpio) Init() error {
-	if err := gpio.Open(); err != nil {
-		return err
+	line, err := chip.RequestLine(rpi.GPIO14, gpiod.AsOutput(1))
+	if err != nil {
+		return nil, err
 	}
 
-	g.pin = gpio.NewPin(g.pinNum)
-	return nil
+	return &Gpio{
+		pinNum: pinNum,
+		chip:   chip,
+		line:   line,
+	}, nil
 }
 
-func (g *Gpio) On() {
-	if g.pin == nil {
-		panic("gpio controller not initialized")
-	}
-	g.pin.High()
+func (g *Gpio) On() error {
+	return g.line.SetValue(1)
 }
 
-func (g *Gpio) Off() {
-	if g.pin == nil {
-		panic("gpio controller not initialized")
-	}
-	g.pin.Low()
+func (g *Gpio) Off() error {
+	return g.line.SetValue(0)
 }
 
 func (g *Gpio) Close() error {
-	return gpio.Close()
+	var errors error
+	if err := g.line.Close(); err != nil {
+		errors = multierror.Append(errors, err)
+	}
+	if err := g.chip.Close(); err != nil {
+		errors = multierror.Append(errors, err)
+	}
+	return errors
 }

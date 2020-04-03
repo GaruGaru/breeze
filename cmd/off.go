@@ -23,6 +23,12 @@ var offCmd = &cobra.Command{
 			panic(err)
 		}
 
-		fanController.Off()
+		if err := fanController.Off(); err != nil {
+			panic(err)
+		}
+
+		if err := fanController.Close(); err != nil {
+			panic(err)
+		}
 	},
 }
