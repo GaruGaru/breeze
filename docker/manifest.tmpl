@@ -1,0 +1,17 @@
+ image: garugaru/breeze:latest
+tags:
+  - latest
+  - {{build.commit}}
+manifests:
+  -
+    image: garugaru/breeze:linux-amd64
+    platform:
+      architecture: amd64
+      os: linux
+      variant: v8
+  -
+    image: garugaru/breeze:linux-arm
+    platform:
+      architecture: arm
+      os: linux
+      variant: v7
