@@ -1,4 +1,6 @@
 ARG GO_VERSION=1.14
+ARG APP_NAME="breeze"
+
 FROM golang:${GO_VERSION}-alpine AS builder
 
 RUN apk add --no-cache ca-certificates git
@@ -10,18 +12,15 @@ RUN go mod download
 
 COPY ./ ./
 
-RUN CGO_ENABLED=0 && go build \
+RUN CGO_ENABLED=0 go build \
     -ldflags="-s -w" \
     -installsuffix 'static' \
     -o /app .
 
 FROM scratch AS final
 
-WORKDIR /
-ENV PATH="/"
-
+COPY --from=builder /app /app
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
-COPY --from=builder /app /breeze
 
-ENTRYPOINT ["breeze"]
+ENTRYPOINT ["/app"]
