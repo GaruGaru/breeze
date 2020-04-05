@@ -7,6 +7,7 @@ import (
 	"breeze/sensor"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"os"
 	"time"
 )
 
@@ -17,6 +18,7 @@ var (
 	metricsEnabled             bool
 	metricsServerPort          int
 	metricsServerAddr          string
+	nodeName                   string
 )
 
 func init() {
@@ -26,6 +28,7 @@ func init() {
 	controllerCmd.Flags().BoolVar(&metricsEnabled, "metrics", false, "expose metrics endpoint for prometheus")
 	controllerCmd.Flags().StringVar(&metricsServerAddr, "metrics-addr", "0.0.0.0", "metrics server bind address")
 	controllerCmd.Flags().IntVar(&metricsServerPort, "metrics-port", 9999, "metrics server port ")
+	controllerCmd.Flags().StringVar(&nodeName, "node-name", envOrDefault("NODE_NAME", "notset"), "metrics node name label")
 
 	rootCmd.AddCommand(controllerCmd)
 }
@@ -54,7 +57,7 @@ var controllerCmd = &cobra.Command{
 
 		if metricsEnabled {
 			go func() {
-				metricsServer := metrics.New(tempSensor)
+				metricsServer := metrics.New(nodeName, tempSensor)
 				if err := metricsServer.Run(metricsServerAddr, metricsServerPort); err != nil {
 					logrus.Error("error running metrics server", err)
 				}
@@ -71,4 +74,12 @@ var controllerCmd = &cobra.Command{
 			panic(err)
 		}
 	},
+}
+
+func envOrDefault(key string, def string) string {
+	val, found := os.LookupEnv(key)
+	if found{
+		return val
+	}
+	return def
 }

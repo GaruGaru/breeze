@@ -13,3 +13,4 @@ spec:
 
   selector:
     app: breeze
+    controller: temperature

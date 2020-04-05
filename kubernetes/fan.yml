@@ -1,19 +1,22 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: DaemonSet
 metadata:
-  name: breeze
+  name: controller
   namespace: breeze
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app: breeze
+      controller: fan
   template:
     metadata:
       labels:
         app: breeze
-
+        controller: fan
     spec:
+      nodeSelector:
+        fan.controller: "true"
+        instance.kind: "onpremise"
       volumes:
         - name: gpio-mem
           hostPath:
@@ -26,11 +29,16 @@ spec:
             path: /dev/gpiochip0
       containers:
         - name: breeze
-          image: garugaru/breeze:arm-latest
-          command: ["breeze", "controller", "--metrics=true"]
+          image: garugaru/breeze
+          command: ["breeze", "controller"]
           imagePullPolicy: Always
           ports:
             - containerPort: 9999
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
           volumeMounts:
             - name: gpio-mem
               mountPath: /dev/gpiomem

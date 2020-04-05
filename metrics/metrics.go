@@ -12,10 +12,13 @@ import (
 type Collector struct {
 	temperature   prometheus.Gauge
 	thermalSensor sensor.Thermal
+	nodeLabel     string
 }
 
 func (c *Collector) Describe(ch chan<- *prometheus.Desc) {
-	ch <- prometheus.NewDesc("temperature", "thermal sensor metrics", nil, nil)
+	ch <- prometheus.NewDesc("temperature", "thermal sensor metrics", nil, prometheus.Labels{
+		"node_name": c.nodeLabel,
+	})
 }
 
 func (c *Collector) Collect(ch chan<- prometheus.Metric) {
@@ -29,8 +32,9 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 	ch <- c.temperature
 }
 
-func New(thermalSensor sensor.Thermal) *Collector {
+func New(nodeName string, thermalSensor sensor.Thermal) *Collector {
 	return &Collector{
+		nodeLabel:     nodeName,
 		thermalSensor: thermalSensor,
 		temperature: prometheus.NewGauge(prometheus.GaugeOpts{
 			Name: "temperature",

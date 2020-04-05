@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: monitor
+  namespace: breeze
+spec:
+  selector:
+    matchLabels:
+      app: breeze
+      controller: temperature
+  template:
+    metadata:
+      labels:
+        app: breeze
+        controller: temperature
+
+    spec:
+      nodeSelector:
+        instance.kind: "onpremise"
+      volumes:
+        - name: gpio
+          hostPath:
+            path: /sys/class/gpio
+      containers:
+        - name: breeze
+          image: garugaru/breeze
+          command: ["breeze", "metrics"]
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 9999
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          volumeMounts:
+            - name: gpio
+              mountPath: /sys/class/gpio
+          securityContext:
+            privileged: true
+          resources:
+            requests:
+              memory: "5Mi"
+              cpu: "10m"
+            limits:
+              memory: "15Mi"
+              cpu: "10m"
+

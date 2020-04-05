@@ -113,12 +113,14 @@ steps:
         from_secret: kubernetes_token
     commands:
       - kubectl apply -f kubernetes/0_namespace.yml
-      - kubectl apply -f kubernetes/deployment.yml
+      - kubectl apply -f kubernetes/fan.yml
+      - kubectl apply -f kubernetes/temp-monitor.yml
       - kubectl apply -f kubernetes/service.yml
       - kubectl apply -f kubernetes/service-monitor.yml
-      - kubectl -n breeze set image deployment/breeze breeze=garugaru/breeze:${DRONE_COMMIT_SHA} --record
-      - kubectl rollout status -f kubernetes/deployment.yml
-
+      - kubectl -n breeze set image ds/breeze  breeze=garugaru/breeze:${DRONE_COMMIT_SHA} --record
+      - kubectl -n breeze set image ds/monitor breeze=garugaru/breeze:${DRONE_COMMIT_SHA} --record
+      - kubectl rollout status -f kubernetes/fan.yml
+      - kubectl rollout status -f kubernetes/temp-monitor.yml
 trigger:
   event:
     - push

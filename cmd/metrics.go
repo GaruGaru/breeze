@@ -10,6 +10,7 @@ import (
 func init() {
 	metricsCmd.Flags().StringVar(&metricsServerAddr, "metrics-addr", "0.0.0.0", "metrics server bind address")
 	metricsCmd.Flags().IntVar(&metricsServerPort, "metrics-port", 9999, "metrics server port ")
+	metricsCmd.Flags().StringVar(&nodeName, "node-name", envOrDefault("NODE_NAME", "notset"), "metrics node name label")
 	rootCmd.AddCommand(metricsCmd)
 }
 
@@ -18,7 +19,7 @@ var metricsCmd = &cobra.Command{
 	Short: "run metrics server",
 	Run: func(cmd *cobra.Command, args []string) {
 		tempSensor := sensor.Cpu{}
-		metricsServer := metrics.New(tempSensor)
+		metricsServer := metrics.New(nodeName, tempSensor)
 		if err := metricsServer.Run(metricsServerAddr, metricsServerPort); err != nil {
 			logrus.Error("error running metrics server", err)
 		}
