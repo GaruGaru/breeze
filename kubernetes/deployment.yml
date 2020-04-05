@@ -8,12 +8,10 @@ spec:
   selector:
     matchLabels:
       app: breeze
-      tier: service
   template:
     metadata:
       labels:
         app: breeze
-        tier: service
 
     spec:
       volumes:
@@ -23,16 +21,23 @@ spec:
         - name: gpio
           hostPath:
             path: /sys/class/gpio
+        - name: gpio-chip0
+          hostPath:
+            path: /dev/gpiochip0
       containers:
         - name: breeze
           image: garugaru/breeze:arm-latest
           command: ["breeze", "controller"]
           imagePullPolicy: Always
+          ports:
+            - containerPort: 9999
           volumeMounts:
             - name: gpio-mem
               mountPath: /dev/gpiomem
             - name: gpio
               mountPath: /sys/class/gpio
+            - name: gpio-chip0
+              mountPath: /dev/gpiochip0
           securityContext:
             privileged: true
           resources:

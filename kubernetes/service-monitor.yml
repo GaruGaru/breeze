@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: breeze
+  namespace: prometheus
+  labels:
+    release: prometheus
+    app: service-monitor
+spec:
+  namespaceSelector:
+    matchNames:
+      - breeze
+  selector:
+    matchLabels:
+      app: breeze
+  endpoints:
+    - port: metrics
+      path: /metrics

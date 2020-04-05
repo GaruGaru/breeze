@@ -3,7 +3,7 @@ ARG APP_NAME="breeze"
 
 FROM golang:${GO_VERSION}-alpine AS builder
 
-RUN apk add --no-cache ca-certificates git
+RUN apk update && apk add --no-cache ca-certificates git
 
 WORKDIR /src
 
