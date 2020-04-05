@@ -18,7 +18,7 @@ RUN CGO_ENABLED=0 go build \
     -o /app .
 
 FROM scratch AS final
-
+ENV PATH="/:${PATH}"
 COPY --from=builder /app /breeze
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-ENTRYPOINT ["/breeze"]
+ENTRYPOINT ["breeze"]

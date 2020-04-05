@@ -27,7 +27,7 @@ spec:
       containers:
         - name: breeze
           image: garugaru/breeze:arm-latest
-          command: ["breeze", "controller"]
+          command: ["breeze", "controller", "--metrics=true"]
           imagePullPolicy: Always
           ports:
             - containerPort: 9999

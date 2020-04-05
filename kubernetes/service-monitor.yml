@@ -4,8 +4,8 @@ metadata:
   name: breeze
   namespace: prometheus
   labels:
-    release: prometheus
-    app: service-monitor
+    release: prometheus-operator
+    app: breeze
 spec:
   namespaceSelector:
     matchNames:

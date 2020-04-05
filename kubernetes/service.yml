@@ -3,6 +3,8 @@ kind: Service
 metadata:
   name: breeze
   namespace: breeze
+  labels:
+    app: breeze
 spec:
   ports:
     - name: metrics
