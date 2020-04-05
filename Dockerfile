@@ -1,9 +1,9 @@
 ARG GO_VERSION=1.14
 ARG APP_NAME="breeze"
 
-FROM golang:${GO_VERSION}-alpine AS builder
+FROM golang:${GO_VERSION} AS builder
 
-RUN apk update && apk add --no-cache ca-certificates git
+RUN apt-get update && apt-get install -y ca-certificates git
 
 WORKDIR /src
 
