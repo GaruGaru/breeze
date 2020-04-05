@@ -117,7 +117,7 @@ steps:
       - kubectl apply -f kubernetes/temp-monitor.yml
       - kubectl apply -f kubernetes/service.yml
       - kubectl apply -f kubernetes/service-monitor.yml
-      - kubectl -n breeze set image ds/breeze  breeze=garugaru/breeze:${DRONE_COMMIT_SHA} --record
+      - kubectl -n breeze set image ds/controller  breeze=garugaru/breeze:${DRONE_COMMIT_SHA} --record
       - kubectl -n breeze set image ds/monitor breeze=garugaru/breeze:${DRONE_COMMIT_SHA} --record
       - kubectl rollout status -f kubernetes/fan.yml
       - kubectl rollout status -f kubernetes/temp-monitor.yml
