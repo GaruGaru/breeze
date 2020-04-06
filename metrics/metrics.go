@@ -10,7 +10,7 @@ import (
 )
 
 type Collector struct {
-	temperature   prometheus.Gauge
+	temperature   *prometheus.GaugeVec
 	thermalSensor sensor.Thermal
 	nodeLabel     string
 }
@@ -27,18 +27,18 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 		log.Warnf("collector: unable to read temperature: %s", err.Error())
 		return
 	}
-
-	c.temperature.Set(read)
-	ch <- c.temperature
+	gauge := c.temperature.WithLabelValues
+	gauge(c.nodeLabel).Set(read)
+	ch <- gauge(c.nodeLabel)
 }
 
 func New(nodeName string, thermalSensor sensor.Thermal) *Collector {
 	return &Collector{
 		nodeLabel:     nodeName,
 		thermalSensor: thermalSensor,
-		temperature: prometheus.NewGauge(prometheus.GaugeOpts{
+		temperature: prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Name: "temperature",
-		}),
+		}, []string{"node"}),
 	}
 }
 
