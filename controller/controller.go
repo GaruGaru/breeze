@@ -49,6 +49,7 @@ func New(config Config) *Controller {
 func (c *Controller) Run(fan fan.Controller, sensor sensor.Thermal) error {
 	for {
 		if c.isInQuietHours(time.Now()) {
+			log.Info("trying to run but was in quiet hours")
 			time.Sleep(c.config.Delay)
 			continue
 		}
