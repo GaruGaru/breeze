@@ -1,4 +1,4 @@
-ARG GO_VERSION=1.14
+ARG GO_VERSION=1.17
 ARG APP_NAME="breeze"
 
 FROM golang:${GO_VERSION} AS builder

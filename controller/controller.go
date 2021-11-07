@@ -17,6 +17,7 @@ type Config struct {
 	Threshold       float64
 	CoolDownPercent float64
 	Delay           time.Duration
+	QuietHours      [2]int
 }
 
 type status struct {
@@ -47,6 +48,11 @@ func New(config Config) *Controller {
 
 func (c *Controller) Run(fan fan.Controller, sensor sensor.Thermal) error {
 	for {
+		if c.isInQuietHours(time.Now()) {
+			time.Sleep(c.config.Delay)
+			continue
+		}
+
 		temp, err := sensor.Read()
 		if err != nil {
 			return err
@@ -64,7 +70,7 @@ func (c *Controller) Run(fan fan.Controller, sensor sensor.Thermal) error {
 		}
 
 		if c.status.coolingDown && temp <= *c.status.targetTemperature {
-			coolingTime := time.Now().Sub(*c.status.beginCoolDown)
+			coolingTime := time.Since(*c.status.beginCoolDown)
 			log.Infof("target temperature (%f°) reached in %d seconds", *c.status.targetTemperature, int(coolingTime.Seconds()))
 
 			c.status.coolingDown = false
@@ -73,13 +79,31 @@ func (c *Controller) Run(fan fan.Controller, sensor sensor.Thermal) error {
 		}
 
 		if c.status.coolingDown {
-			fan.On()
+			if err := fan.On(); err != nil {
+				log.Errorf("error turning on fan: %s", err.Error())
+			}
 		} else {
-			fan.Off()
+			if err := fan.Off(); err != nil {
+				log.Errorf("error turning off fan: %s", err.Error())
+			}
 		}
 
 		time.Sleep(c.config.Delay)
 	}
+}
+
+func (c *Controller) isInQuietHours(t time.Time) bool {
+	if c.config.QuietHours == [2]int{} {
+		return false
+	}
+	hr := t.Hour()
+
+	//cross day
+	if c.config.QuietHours[0] > c.config.QuietHours[1] {
+		return hr >= c.config.QuietHours[0] || hr <= c.config.QuietHours[1]
+	}
+
+	return hr >= c.config.QuietHours[0] && hr <= c.config.QuietHours[1]
 }
 
 func float64Ptr(val float64) *float64 {
