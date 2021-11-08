@@ -50,6 +50,11 @@ func (c *Controller) Run(fan fan.Controller, sensor sensor.Thermal) error {
 	for {
 		if c.isInQuietHours(time.Now()) {
 			log.Info("trying to run but was in quiet hours")
+
+			if err := fan.Off(); err != nil {
+				log.Errorf("error turning off fan: %s", err.Error())
+			}
+
 			time.Sleep(c.config.Delay)
 			continue
 		}
